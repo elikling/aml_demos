@@ -1,0 +1,30 @@
+# visualisation
+matplotlib
+seaborn
+
+# basics
+ipykernel
+ipywidgets
+numpy
+pandas
+python-dotenv
+tqdm
+
+# data
+fastparquet
+
+# data sceience/ML
+scipy
+scikit-learn
+torch
+xgboost
+
+# aml
+azure-ai-ml
+azure-identity
+azureml-core
+mlflow
+azureml-mlflow
+#azureml-defaults - it brakes things
+adlfs
+fsspec

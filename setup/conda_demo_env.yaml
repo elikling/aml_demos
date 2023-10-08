@@ -1,0 +1,16 @@
+name: aml_demos
+channels:
+  - defaults
+  - pytorch
+  - conda-forge
+  - huggingface
+dependencies:
+  - python=3.11
+  - pytorch
+  - torchvision
+  - torchaudio
+  - cudatoolkit
+  - cudnn
+  - pip
+  - pip:
+      - -r demo_requirements.txt
