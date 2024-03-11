@@ -38,7 +38,7 @@ az ml job create --file parallel_bird_models_pipeline.yaml
 - [demo code github](https://github.com/elikling/aml_demos)
 - [Hautphenne, S., and Patch, B., (2021). Birth-and-death Processes in Python: The BirDePy Package. arXiv preprint arXiv:2110.05067](https://arxiv.org/abs/2110.05067)
 - [BirDePy github](https://birdepy.github.io/)
-- [multiprocessing — Process-based parallelism] (https://docs.python.org/3/library/multiprocessing.html)
+- [multiprocessing — Process-based parallelism](https://docs.python.org/3/library/multiprocessing.html)
 - [az ml job](https://learn.microsoft.com/en-us/cli/azure/ml/job?view=azure-cli-latest)
 - [How to debug pipeline reuse issues in Azure Machine Learning?](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-debug-pipeline-reuse-issues?view=azureml-api-2) - Discusses the *Reuse* behavior: Pipleline *ForeceRerun* & Componenet *is_deterministic*
 - [Manage inputs and outputs of component and pipeline](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-manage-inputs-outputs-pipeline?view=azureml-api-2&tabs=cli)
