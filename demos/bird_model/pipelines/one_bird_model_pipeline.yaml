@@ -1,0 +1,43 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+
+# help: [Manage inputs and outputs of component and pipeline](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-manage-inputs-outputs-pipeline?view=azureml-api-2&tabs=cli)
+
+display_name: run_one_bird_model
+description: "run one bird model"
+experiment_name: one_bird_model_scenario
+type: pipeline
+
+# <inputs_and_outputs>
+
+inputs:
+  rate_of_spread: 0.50
+
+outputs:
+  artefacs_folder:
+    type: uri_folder
+    #custom_path = "azureml://datastores/workspaceblobstore/paths/custom_path/${{name}}/"
+    path: azureml://datastores/${{default_datastore}}/paths/one_bird_model_pipeline
+    mode: rw_mount
+
+# </inputs_and_outputs>
+
+# <jobs>
+
+settings:
+  default_compute: azureml:serverless
+  default_datastore: azureml:bird_model_01
+  #default_environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu:1
+  continue_on_step_failure: false
+  force_rerun: True
+
+jobs:
+  model_step:
+    type: command
+    component: ../components/one_bird_model/one_bird_model.yaml
+    inputs:
+      rate_of_spread: ${{parent.inputs.rate_of_spread}}
+      
+    outputs:
+      artefacs_folder: ${{parent.outputs.artefacs_folder}}
+  
+# </jobs>

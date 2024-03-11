@@ -1,0 +1,32 @@
+# <component>
+name: one_bird_model
+display_name: one run of bird model
+
+type: command
+inputs:
+  rate_of_spread: 
+    type: number
+  
+outputs:
+  artefacs_folder:
+    type: uri_folder
+    mode: rw_mount
+  
+code: .
+
+environment: 
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest
+  conda_file: ./conda.yaml
+
+command: >-
+  echo " <<< brore job >>>";
+  ls -la ${{outputs.artefacs_folder}};
+  echo " <<< ---- >>>";
+  echo "  ";
+  python one_bird_model.py 
+  --rate_of_spread ${{inputs.rate_of_spread}}
+  --artefacs_folder ${{outputs.artefacs_folder}};
+  echo "  ";
+  echo " <<< after job >>>";
+  ls -la ${{outputs.artefacs_folder}};
+# </component>

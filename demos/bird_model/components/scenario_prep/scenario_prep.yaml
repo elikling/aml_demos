@@ -1,0 +1,22 @@
+# <component>
+name: scenario_prep
+display_name: scenario configuration
+
+type: command
+is_deterministic: True
+  
+outputs:
+  output_folder:
+    type: uri_folder
+    mode: rw_mount
+  
+code: .
+
+environment: 
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest
+  conda_file: ./conda.yaml
+
+command: >-
+  python scenario_prep.py 
+  --output_folder ${{outputs.output_folder}};
+# </component>

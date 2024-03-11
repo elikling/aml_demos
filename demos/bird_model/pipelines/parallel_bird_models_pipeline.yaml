@@ -1,0 +1,90 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+
+# help: [Manage inputs and outputs of component and pipeline](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-manage-inputs-outputs-pipeline?view=azureml-api-2&tabs=cli)
+name: parallel_bird_models_pipeline_yaml007
+display_name: parallel_bird_models [yaml]
+description: "run parallel bird models"
+experiment_name: parallel_bird_models_job_yaml
+type: pipeline
+
+tags:
+  owner: eli
+  type: Demo
+
+# <inputs_and_outputs>
+
+outputs:
+  scenarios_folder:
+    type: uri_folder
+    mode: rw_mount
+
+  artefacts_folder:
+    type: uri_folder
+    path: azureml://datastores/${{default_datastore}}/paths/parallel_bird_models
+    mode: rw_mount
+# </inputs_and_outputs>
+
+# <jobs>
+
+settings:
+  default_compute: azureml:aml-eli-cluster-strong
+  default_datastore: azureml:bird_model_parallel
+  #default_environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu:1
+  continue_on_step_failure: false
+  force_rerun: True
+
+jobs:
+  scenario_prep_step:
+    type: command
+    component: ../components/scenario_prep/scenario_prep.yaml
+    outputs:
+      output_folder: ${{parent.outputs.scenarios_folder}}
+  
+  parallel_step:
+    type: parallel
+    compute: azureml:aml-demo-cluster
+    inputs:
+      input_data: 
+        type: uri_folder
+        path: ${{parent.jobs.scenario_prep_step.outputs.output_folder}}
+        mode: download
+
+    outputs:
+      job_output_folder:
+        type: uri_folder
+        path: ${{parent.outputs.artefacts_folder}}
+        mode: rw_mount
+
+
+    #input_data: ${{parent.jobs.scenario_prep_step.outputs.output_folder}}
+    input_data: ${{inputs.input_data}}
+    #output_folder: ${{outputs.job_output_folder}}
+    mini_batch_size: "10kb"
+    
+    resources:
+      instance_count: 2
+    max_concurrency_per_instance: 2
+    error_threshold: -1
+    mini_batch_error_threshold: 5
+    retry_settings:
+      max_retries: 2
+      timeout: 60
+
+    logging_level: "DEBUG"
+    environment_variables:
+      "AZUREML_PARALLEL_EXAMPLE": "BirdModel"
+
+    task:
+      type: function
+      is_deterministic: false
+      code: "../components/parallel_bird_models/"
+      entry_script: parallel_bird_models.py
+      environment:
+        image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04
+        conda_file: ../components/parallel_bird_models/conda.yaml
+      program_arguments: >-
+        --input_data ${{inputs.input_data}}
+        --output_folder ${{outputs.job_output_folder}}
+      
+# </jobs>
+
