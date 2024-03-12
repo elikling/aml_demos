@@ -1,6 +1,6 @@
-# Parallelisation of Senario Modelling (aml componenets)
+# Parallelisation of Scenario Modelling (aml components)
 
-Senarios modelling suffers from the curse of dimensionality. Very fast the modeler end up with a simulation or optimisation that is complex and evaluating all the scenarios to compare consuming a significant time. It makes sense to run the scenario evaluation in parallel. I demonstrate how the azure machine learning pipelines can be configured for this purpose:
+Scenario modelling suffers from the curse of dimensionality. Very fast the modeler end up with a simulation or optimisation that is complex and evaluating all the scenarios to compare consuming a significant time. It makes sense to run the scenario evaluation in parallel. I demonstrate how the azure machine learning pipelines can be configured for this purpose:
     - Simply run multiple az ml job create
 Use the parallel component facility
 
@@ -12,7 +12,7 @@ Use the parallel component facility
 
 ```bash
 az login --identity
-az account set --subscription "Avanade UK - Data & AI R&D"
+az account set --subscription "<subscription>"
 export AZURE_ML_CLI_PRIVATE_FEATURES_ENABLED=true
 ```
 

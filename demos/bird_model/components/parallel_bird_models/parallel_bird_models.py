@@ -16,13 +16,9 @@ def init():
     parser = argparse.ArgumentParser(
         allow_abbrev=False, description="ParallelRunStep Agent"
     )
-    parser.add_argument("--input_data", type=str)
     parser.add_argument("--output_folder", type=str)
 
     args, _ = parser.parse_known_args()
-
-    global input_data
-    input_data = args.input_data
 
     global output_folder
     output_folder = args.output_folder

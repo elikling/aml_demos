@@ -1,14 +1,13 @@
 $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 
-# help: [Manage inputs and outputs of component and pipeline](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-manage-inputs-outputs-pipeline?view=azureml-api-2&tabs=cli)
-name: parallel_bird_models_pipeline_yaml007
+name: parallel_bird_models_pipeline_yaml
 display_name: parallel_bird_models [yaml]
 description: "run parallel bird models"
 experiment_name: parallel_bird_models_job_yaml
 type: pipeline
 
 tags:
-  owner: eli
+  owner: Eli Kling
   type: Demo
 
 # <inputs_and_outputs>
@@ -55,10 +54,7 @@ jobs:
         path: ${{parent.outputs.artefacts_folder}}
         mode: rw_mount
 
-
-    #input_data: ${{parent.jobs.scenario_prep_step.outputs.output_folder}}
     input_data: ${{inputs.input_data}}
-    #output_folder: ${{outputs.job_output_folder}}
     mini_batch_size: "10kb"
     
     resources:
@@ -82,9 +78,7 @@ jobs:
       environment:
         image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04
         conda_file: ../components/parallel_bird_models/conda.yaml
-      program_arguments: >-
-        --input_data ${{inputs.input_data}}
-        --output_folder ${{outputs.job_output_folder}}
+      program_arguments: "--output_folder ${{outputs.job_output_folder}} "
       
 # </jobs>
 
