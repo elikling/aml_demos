@@ -1,0 +1,43 @@
+$schema: http://azureml/sdk-2-0/CommandComponent.json
+name: decision_tree_classifier_component
+display_name: "decision tree classifier component"
+version: 1
+type: command
+is_deterministic: False
+
+inputs:
+  training_data:
+    type: path
+  test_data:
+    type: path
+  target_column_name:
+    type: string
+  #exclude_features:
+  #  type: string
+  model_base_name:
+    type: string
+
+outputs:
+  model_output:
+    type: uri_folder
+  model_info_output_path:
+    type: path
+
+code: .
+
+#compute: serverless
+
+#environment: azureml://registries/azureml/environments/responsibleai-ubuntu20.04-py38-cpu/versions/21
+environment:
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu22.04:latest
+  conda_file: ./conda.yaml
+
+command: >-
+  pip install json;
+  python decision_tree_classifier.py
+  --training_data ${{inputs.training_data}}
+  --test_data ${{inputs.test_data}}
+  --target_column_name ${{inputs.target_column_name}}
+  --model_base_name ${{inputs.model_base_name}}
+  --model_output ${{outputs.model_output}}
+  --model_info_output_path ${{outputs.model_info_output_path}};

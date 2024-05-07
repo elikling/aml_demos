@@ -1,0 +1,21 @@
+name: py11_sdk2
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.9
+  - pip
+  - numpy
+  - pandas
+  - pip:
+    - ipykernel
+    - ipywidgets
+    - scipy
+    - scikit-learn
+    - scikit-learn-intelex
+    - mlflow
+    - azure-ai-ml
+    - azureml-mlflow
+    - mltable
+    - azureml-core
+

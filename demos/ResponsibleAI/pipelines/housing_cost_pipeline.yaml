@@ -1,0 +1,77 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+
+display_name: housing_costs_demo1
+description: "Register Model for RAI Housing example"
+experiment_name: "RAI_Housing_Example_Model_Training"
+type: pipeline
+
+settings:
+  default_compute: azureml:rai-cluster
+  default_datastore: azureml:workspaceblobstore
+  continue_on_step_failure: false
+  force_rerun: True
+
+# <inputs_and_outputs>
+
+inputs:
+  target_column_name: "Sold_HigherThan_Median"
+  
+  training_data: 
+    type: mltable
+    path: "azureml:housing_train_pq:1"
+
+  test_data: 
+    type: mltable
+    path: "azureml:housing_test_pq:1"
+
+  classes_in_target: '["Less than median", "More than median"]'
+  categorical_features: '["OverallCond", "OverallQual", "Fireplaces", "GarageCars", "ScreenPorch"]'
+
+  model_name : "rai_housing_classifier_demo1"
+
+
+# </inputs_and_outputs>
+
+# <jobs>
+
+jobs:
+  classifier_step:
+    type: command
+    component: ../components/lgbm/lgbm.yaml
+    inputs:
+      training_data: ${{parent.inputs.training_data}}
+      test_data: ${{parent.inputs.test_data}}
+      target_column_name: ${{parent.inputs.target_column_name}}
+      model_base_name: ${{parent.inputs.model_name}}
+
+  create_rai_job: 
+    type: command 
+    component: azureml://registries/azureml/components/microsoft_azureml_rai_tabular_insight_constructor/versions/0.14.0
+    limits:
+      timeout: 480
+    inputs: 
+      title: "From YAML snippet"
+      task_type: classification
+      model_info_path: ${{parent.jobs.classifier_step.outputs.model_info_output_path}}
+      train_dataset: ${{parent.inputs.training_data}} 
+      test_dataset: ${{parent.inputs.test_data}} 
+      target_column_name: ${{parent.inputs.target_column_name}}   
+      categorical_column_names: ${{parent.inputs.categorical_features}}
+    
+  error_analysis_01:
+    type: command 
+    component: azureml://registries/azureml/components/microsoft_azureml_rai_tabular_erroranalysis/versions/0.14.0
+    inputs:
+      rai_insights_dashboard: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}} 
+
+  gather_01: 
+    type: command 
+    component: azureml://registries/azureml/components/microsoft_azureml_rai_tabular_insight_gather/versions/0.14.0
+    inputs: 
+      constructor: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}} 
+      #insight_1: ${{parent.jobs.causal_01.outputs.causal}} 
+      #insight_2: ${{parent.jobs.counterfactual_01.outputs.counterfactual}} 
+      insight_3: ${{parent.jobs.error_analysis_01.outputs.error_analysis}} 
+      #insight_4: ${{parent.jobs.explain_01.outputs.explanation}}  
+
+# </jobs>

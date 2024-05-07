@@ -1,0 +1,25 @@
+$schema: http://azureml/sdk-2-0/CommandComponent.json
+name: rai_housing_training_component
+display_name: Housing training component for RAI example
+version: 1
+type: command
+is_deterministic: False
+
+inputs:
+  training_data:
+    type: path
+  target_column_name:
+    type: string
+outputs:
+  model_output:
+    type: uri_folder
+
+code: .
+
+environment: azureml://registries/azureml/environments/responsibleai-ubuntu20.04-py38-cpu/versions/21
+
+command: >-
+  python lgbm.py
+  --training_data ${{inputs.training_data}}
+  --target_column_name ${{inputs.target_column_name}}
+  --model_output ${{outputs.model_output}};

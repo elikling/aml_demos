@@ -1,0 +1,105 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+
+display_name: academic_sucess_demo1
+description: "Register Model for RAI academic_sucess example"
+experiment_name: "RAI Demo using academic sucess"
+type: pipeline
+
+settings:
+  default_compute: azureml:rai-cluster
+  default_datastore: azureml:workspaceblobstore
+  continue_on_step_failure: false
+  force_rerun: True
+
+# <inputs_and_outputs>
+
+inputs:
+  target_column_name: "binary_target"
+  
+  training_data: 
+    type: mltable
+    path: "azureml:academic_sucess_train_mltable:17"
+
+  test_data: 
+    type: mltable
+    path: "azureml:academic_sucess_test_mltable:17"
+
+  #classes_in_target: '["Graduate", "Dropout","Enrolled"]'
+  classes_in_target: '["Graduated/Still Enrolled", "Dropout"]'
+  categorical_features: '["Marital_status",
+                                 "Daytime_evening_attendance",
+                                 "Scholarship_holder",
+                                 "Displaced",
+                                 "Gender",
+                                 "Debtor",
+                                 "Tuition_fees_up_to_date",
+                                 "International",
+                                 "Daytime_evening_attendance",
+                                 "Educational_special_needs"]'
+  #treatment_features: '["Target","marital_status","application_mode","course","daytime_evening_attendance","previous_qualification","nacionality","mother_qualification","father_qualification","mother_occupation","father_occupation","displaced","educational_special_needs","debtor","tuition_fees_up_to_date","gender","scholarship_holder","international"]'
+  treatment_features: '["Target","Marital_status","Application_mode","Course","Daytime_evening_attendance","Previous_qualification","Nacionality","Mother_qualification","Father_qualification","Mother_occupation","Father_occupation","Displaced","Educational_special_needs","Debtor","Tuition_fees_up_to_date","Gender","Scholarship_holder","International"]'
+  #treatment_features: '["Marital_status","Daytime_evening_attendance"]'
+  #exclude_features: "'Target','Marital_status','Application_mode','Course','Daytime_evening_attendance','Previous_qualification','Nacionality','Mother_qualification','Father_qualification','Mother_occupation','Father_occupation','Displaced','Educational_special_needs','Debtor','Tuition_fees_up_to_date','Gender','Scholarship_holder','International'"
+  #exclude_features: "NA"
+
+  model_name : "rai_academic_sucess_demo1"
+
+# </inputs_and_outputs>
+
+# <jobs>
+
+jobs:
+  #gradient_boosting_classifier_step:
+  #  type: command
+  #  component: ../components/GradientBoostingClassifier/GradientBoostingClassifier.yaml
+  #  inputs:
+  #    training_data: ${{parent.inputs.training_data}}
+  #    test_data: ${{parent.inputs.test_data}}
+  #    target_column_name: ${{parent.inputs.target_column_name}}
+  #    exclude_features: ${{parent.inputs.exclude_features}}
+  #    model_base_name: ${{parent.inputs.model_name}}
+
+  decision_tree_classifier_step:
+    type: command
+    component: ../components/decision_tree_classifier/decision_tree_classifier.yaml
+    inputs:
+      training_data: ${{parent.inputs.training_data}}
+      test_data: ${{parent.inputs.test_data}}
+      target_column_name: ${{parent.inputs.target_column_name}}
+      #exclude_features: ${{parent.inputs.exclude_features}}
+      model_base_name: ${{parent.inputs.model_name}}_dtc
+
+  create_rai_job: 
+    type: command 
+    component: azureml://registries/azureml/components/microsoft_azureml_rai_tabular_insight_constructor/versions/0.14.0
+    limits:
+      timeout: 480
+    inputs: 
+      title: "From YAML snippet"
+      task_type: classification
+      #model_info_path: ${{parent.jobs.gradient_boosting_classifier_step.outputs.model_info_output_path}}
+      model_info_path: ${{parent.jobs.decision_tree_classifier_step.outputs.model_info_output_path}}
+      train_dataset: ${{parent.inputs.training_data}} 
+      test_dataset: ${{parent.inputs.test_data}} 
+      target_column_name: ${{parent.inputs.target_column_name}}   
+      categorical_column_names: ${{parent.inputs.categorical_features}}
+      use_model_dependency: True
+    
+  error_analysis_01:
+    type: command 
+    component: azureml://registries/azureml/components/microsoft_azureml_rai_tabular_erroranalysis/versions/0.14.0
+    inputs:
+      rai_insights_dashboard: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}} 
+      #filter_features: `["style", "Employer"]'
+
+  gather_01: 
+    type: command 
+    component: azureml://registries/azureml/components/microsoft_azureml_rai_tabular_insight_gather/versions/0.14.0
+    inputs: 
+      constructor: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}} 
+      #insight_1: ${{parent.jobs.causal_01.outputs.causal}} 
+      #insight_2: ${{parent.jobs.counterfactual_01.outputs.counterfactual}} 
+      insight_3: ${{parent.jobs.error_analysis_01.outputs.error_analysis}} 
+      #insight_4: ${{parent.jobs.explain_01.outputs.explanation}}  
+
+# </jobs>
