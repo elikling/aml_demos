@@ -12,6 +12,8 @@ inputs:
     type: path
   target_column_name:
     type: string
+  exclude_features:
+    type: string    
   model_base_name:
     type: string
 
@@ -33,6 +35,7 @@ command: >-
   --training_data ${{inputs.training_data}}
   --test_data ${{inputs.test_data}}
   --target_column_name ${{inputs.target_column_name}}
+  --exclude_features ${{inputs.exclude_features}}
   --model_base_name ${{inputs.model_base_name}}
   --model_output ${{outputs.model_output}}
   --model_info_output_path ${{outputs.model_info_output_path}};

@@ -1,5 +1,6 @@
 import argparse
 import os
+import numpy as np
 import json
 import shutil
 import tempfile
@@ -23,6 +24,7 @@ def parse_args():
     parser.add_argument("--training_data", type=str, help="Path to training data")
     parser.add_argument("--test_data", type=str, help="Path to test data")
     parser.add_argument("--target_column_name", type=str, help="Name of target column")
+    parser.add_argument("--exclude_features", type=str, help="Name of columns to exlude from the training set")
     parser.add_argument("--model_base_name", type=str, help="Name of the registered model - list")
     parser.add_argument("--model_output", type=str, help="Path of output model")
     parser.add_argument("--model_info_output_path", type=str, help="Path to write model info JSON")
@@ -53,6 +55,8 @@ def main(args):
     print("all_data cols: {0}".format(all_data.columns))
     y_train = all_data[args.target_column_name]
     X_train = all_data.drop(labels=args.target_column_name, axis="columns")
+    #X_train = X_train.drop(labels=args.exclude_features, axis="columns")
+    X_train[args.exclude_features] = 0 #I cannot drop it so I make it not relevant
     print("X_train cols: {0}".format(X_train.columns))
 
     # Read in test data
@@ -61,11 +65,20 @@ def main(args):
     test_df = test_tbl.to_pandas_dataframe()
     y_test = test_df[args.target_column_name]
     X_test = test_df.drop(labels=args.target_column_name, axis="columns")
+    #X_test = X_test.drop(labels=args.exclude_features, axis="columns")
 
     print("Training model")
     # The estimator can be changed to suit
     model = LGBMClassifier(n_estimators=5)
     model.fit(X_train, y_train)
+
+    # Get feature importances (choose 'split' or 'gain')
+    importance_type = 'split'  # Change to 'gain' if desired
+    feature_importances = model.feature_importances_
+
+    # Print feature importances
+    print(f">>> Feature importances ({importance_type}): <<<")
+    print(feature_importances)
 
     y_pred = model.predict(X_test)
     print("<<< classification_report >>>")

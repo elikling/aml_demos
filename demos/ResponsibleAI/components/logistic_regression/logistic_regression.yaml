@@ -1,6 +1,6 @@
 $schema: http://azureml/sdk-2-0/CommandComponent.json
-name: decision_tree_classifier_component
-display_name: "decision tree classifier component"
+name: logistic_regression_component
+display_name: "logistic regression component"
 version: 1
 type: command
 is_deterministic: False
@@ -34,7 +34,7 @@ environment:
 
 command: >-
   pip install json;
-  python decision_tree_classifier.py
+  python logistic_regression.py
   --training_data ${{inputs.training_data}}
   --test_data ${{inputs.test_data}}
   --target_column_name ${{inputs.target_column_name}}

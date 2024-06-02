@@ -8,7 +8,7 @@ import mlflow
 import mlflow.sklearn
 import mltable
 from sklearn.metrics import classification_report
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
 
 
 def parse_args():
@@ -69,16 +69,29 @@ def main(args):
 
 
     print("Training model")
-    model = DecisionTreeClassifier(max_depth=3, min_impurity_decrease=0.015)
+    model = LogisticRegression()
     
     model.fit(X_train, y_train)
 
-    print(">>> Feature importances (Gini importance): <<<")
-    print(model.feature_importances_)
+    # Print coefficients and intercept
+    print(">>>> Coefficients (weights): <<< ")
+    print(model.coef_)
+    print(">>> Intercept (bias):", model.intercept_)
 
     y_pred = model.predict(X_test)
     print("<<< classification_report >>>")
     print(classification_report(y_test, y_pred))
+
+    # Compute feature importance (standardized coefficients)
+    X_train_reduced = X_train.drop(labels=args.exclude_features, axis="columns")
+    print("X_train_reduced cols: {0}".format(X_train_reduced.columns))
+    std_X_train = X_train_reduced / np.std(X_train_reduced, axis=0)
+    std_model = LogisticRegression()
+    std_model.fit(std_X_train, y_train)
+
+    print(">>>> Standardized coefficients: <<<")
+    print(std_model.coef_)
+
 
     # Eli - I think just saving the model with out going through temp shoudl work:
     mlflow.sklearn.save_model(sk_model=model, path=args.model_output)
