@@ -1,0 +1,22 @@
+name: componenet
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.10
+  - numpy
+  - pandas
+  - pip
+  - pip:
+    - ipykernel
+    - ipywidgets
+    - scipy
+    - scikit-learn
+    - scikit-learn-intelex
+    - mlflow
+    - azure-ai-ml
+    - azureml-mlflow
+    - mltable
+    - azureml-core
+    - responsibleai==0.29.0
+

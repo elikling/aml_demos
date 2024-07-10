@@ -1,0 +1,18 @@
+name: componenet
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.10
+  - numpy
+  - pandas
+  - matplotlib
+  - regex
+  - pip
+  - pip:
+    - mltable
+    - causal-learn
+    - dowhy
+    - networkx
+    
+

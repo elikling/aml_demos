@@ -1,0 +1,30 @@
+$schema: http://azureml/sdk-2-0/CommandComponent.json
+name: causal_discovery_component
+display_name: "Causal Discovery Component"
+version: 1
+type: command
+is_deterministic: False
+
+inputs:
+  data_mltable:
+    type: path
+  exclude_features:
+    type: string
+
+outputs:
+  step_artifacts:
+    type: uri_folder
+
+code: .
+
+environment:
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu22.04:latest
+  conda_file: ./conda.yaml
+
+#sudo apt install graphviz;
+
+command: >-
+  python causal_discovery.py
+  --data_mltable ${{inputs.data_mltable}}
+  --exclude_features ${{inputs.exclude_features}}
+  --step_artifacts ${{outputs.step_artifacts}};
